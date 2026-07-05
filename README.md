@@ -1,10 +1,10 @@
 # krexizm portfolio
 
-Personal portfolio site for [Krex](https://krexizm.cc) — built with React, TypeScript, and Vite.
+Personal portfolio site for [myself](https://krexizm.cc) — built with React, TypeScript, and Vite.
 
 ## Features
 
-- Real-time Discord status via [Lanyard](https://lanyard.wtf)
+- Real-time Discord status via [Lanyard](https://lanyard.cnrad.dev/)
 - GitHub repos, contribution graph, and language stats
 - Discord widgets (current games, played games)
 - Animated page transitions with Framer Motion
