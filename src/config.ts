@@ -56,7 +56,6 @@ export const config = {
 // API endpoints derived from config
 export const api = {
   lanyardWs: `wss://api.lanyard.rest/socket`,
-  lanyardRest: `https://api.lanyard.rest/v1/users/${config.discord.id}`,
   discordAvatar: (userId: string, avatarId: string) =>
     `https://cdn.discordapp.com/avatars/${userId}/${avatarId}.png?size=128`,
   discordProfile: `https://dcdn.dstn.to/profile/${config.discord.id}`,
