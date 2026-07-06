@@ -5,6 +5,7 @@ export const config = {
   dateOfBirth: '2009-04-01T00:00:00Z' as const,
   location: 'Austria / Vienna' as const,
   country: 'Austria' as const,
+  web3formsAccessKey: '1e740942-80db-4c1d-9355-1e96de939c64'  as const,
 
   // IDs
   discord: {
@@ -27,6 +28,12 @@ export const config = {
       url: 'https://discord.com/users/699386102066446346' as const,
       handle: 'krexizm.' as const,
       description: 'Community and chat' as const,
+    },
+    {
+      name: 'Telegram' as const,
+      url: 'https://t.me/krexizm' as const,
+      handle: '@krexizm' as const,
+      description: 'Direct messages' as const,
     },
     {
       name: 'Instagram' as const,
@@ -54,10 +61,15 @@ export const config = {
 } as const;
 
 // API endpoints derived from config
+const SAFE_DISCORD_ID = /^\d{17,20}$/;
+const SAFE_AVATAR_HASH = /^[a-f0-9]{32}$/i;
+
 export const api = {
   lanyardWs: `wss://api.lanyard.rest/socket`,
-  discordAvatar: (userId: string, avatarId: string) =>
-    `https://cdn.discordapp.com/avatars/${userId}/${avatarId}.png?size=128`,
+  discordAvatar: (userId: string, avatarId: string) => {
+    if (!SAFE_DISCORD_ID.test(userId) || !SAFE_AVATAR_HASH.test(avatarId)) return '';
+    return `https://cdn.discordapp.com/avatars/${userId}/${avatarId}.png?size=128`;
+  },
   discordProfile: `https://dcdn.dstn.to/profile/${config.discord.id}`,
   githubUser: `https://api.github.com/users/${config.github.username}`,
   githubRepos: `https://api.github.com/users/${config.github.username}/repos?per_page=100&sort=updated`,

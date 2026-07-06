@@ -252,6 +252,7 @@ function DiscordBlock({ profile }: { profile: DiscordProfile | null }) {
               width={56}
               height={56}
               className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-3 sm:border-4 border-[#0a0a0a]"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-3 sm:border-4 border-[#0a0a0a] bg-surface-elevated flex items-center justify-center text-xl sm:text-2xl font-bold text-secondary">
@@ -278,7 +279,7 @@ function DiscordBlock({ profile }: { profile: DiscordProfile | null }) {
             {badges.map((b) => (
               <span key={b.id} className="group relative">
                 <img
-                  src={`https://cdn.discordapp.com/badge-icons/${b.icon}.png?size=32`}
+                  src={`https://cdn.discordapp.com/badge-icons/${b.icon.replace(/[^a-f0-9]/gi, '')}.png?size=32`}
                   alt={b.description}
                   width={20}
                   height={20}
@@ -354,6 +355,8 @@ interface GameInfo {
   cover: string | null;
 }
 
+const SAFE_GAME_ID = /^\d{17,20}$/;
+
 function useGameInfo(gameId: string): { game: GameInfo | null; loading: boolean } {
   const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -361,6 +364,10 @@ function useGameInfo(gameId: string): { game: GameInfo | null; loading: boolean 
   useEffect(() => {
     let cancelled = false;
     async function loadGame() {
+      if (!SAFE_GAME_ID.test(gameId)) {
+        if (!cancelled) { setGame({ id: gameId, name: gameId, icon: null, cover: null }); setLoading(false); }
+        return;
+      }
       try {
         const res = await fetch(`https://discord.com/api/v10/applications/${gameId}/rpc`);
         if (!res.ok) throw new Error('not found');

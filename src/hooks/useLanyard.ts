@@ -121,7 +121,14 @@ export function useLanyard() {
       mountedRef.current = false;
       clearInterval(heartbeatRef.current);
       clearTimeout(reconnectRef.current);
-      wsRef.current?.close();
+      const ws = wsRef.current;
+      if (ws) {
+        if (ws.readyState === WebSocket.CONNECTING) {
+          ws.onopen = () => ws.close();
+        } else if (ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
+      }
     };
   }, []);
 

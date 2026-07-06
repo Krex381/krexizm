@@ -34,7 +34,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               {this.getMessage(code)}
             </p>
             <p className="text-muted text-sm mb-6">
-              {this.state.error?.message}
+              Something went wrong.
             </p>
             <button
               type="button"
