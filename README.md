@@ -71,4 +71,4 @@ The contact form uses [Web3Forms](https://web3forms.com) — messages are sent d
 
 ## License
 
-Private — not for redistribution.
+[Apache-2.0 License](LICENSE)
