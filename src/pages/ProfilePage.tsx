@@ -115,7 +115,7 @@ function LiveAge() {
 
 function IdentityBlock() {
   return (
-    <div className="glass p-6 flex flex-col sm:flex-row items-center justify-center gap-6 text-center">
+    <div className="glass p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-center">
       <div className="flex items-center gap-3">
         <ReactCountryFlag
           countryCode={getCountryCode(config.country)}
@@ -124,25 +124,25 @@ function IdentityBlock() {
           title={config.country}
         />
         <div>
-          <p className="text-sm text-secondary">Location</p>
-          <p className="font-mono text-sm" style={{ fontFamily: "'Geist Mono', monospace" }}>{config.location}</p>
+          <p className="text-xs sm:text-sm text-secondary">Location</p>
+          <p className="font-mono text-xs sm:text-sm" style={{ fontFamily: "'Geist Mono', monospace" }}>{config.location}</p>
         </div>
       </div>
       <div className="hidden sm:block w-px h-8 bg-white/10" />
       <div>
-        <p className="text-sm text-secondary flex items-center gap-1.5 justify-center">
+        <p className="text-xs sm:text-sm text-secondary flex items-center gap-1.5 justify-center">
           <Clock size={12} /> Local Time
         </p>
-        <p className="font-mono text-sm tabular-nums" style={{ fontFamily: "'Geist Mono', monospace" }}>
+        <p className="font-mono text-xs sm:text-sm tabular-nums" style={{ fontFamily: "'Geist Mono', monospace" }}>
           <LocalClock />
         </p>
       </div>
       <div className="hidden sm:block w-px h-8 bg-white/10" />
       <div>
-        <p className="text-sm text-secondary flex items-center gap-1.5 justify-center">
+        <p className="text-xs sm:text-sm text-secondary flex items-center gap-1.5 justify-center">
           <Calendar size={12} /> Age
         </p>
-        <p className="font-mono text-sm tabular-nums" style={{ fontFamily: "'Geist Mono', monospace" }}>
+        <p className="font-mono text-xs sm:text-sm tabular-nums" style={{ fontFamily: "'Geist Mono', monospace" }}>
           <LiveAge />
         </p>
       </div>
@@ -242,19 +242,19 @@ function DiscordBlock({ profile }: { profile: DiscordProfile | null }) {
   const bio = user?.bio || '';
 
   return (
-    <div className="glass p-6">
-      <div className="flex items-end gap-4 mb-4">
+    <div className="glass p-4 sm:p-6">
+      <div className="flex items-end gap-3 sm:gap-4 mb-4">
         <div className="relative shrink-0">
           {user?.avatar ? (
             <img
               src={api.discordAvatar(user.id, user.avatar)}
               alt="Discord avatar"
-              width={64}
-              height={64}
-              className="w-16 h-16 rounded-full border-4 border-[#0a0a0a]"
+              width={56}
+              height={56}
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-3 sm:border-4 border-[#0a0a0a]"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full border-4 border-[#0a0a0a] bg-surface-elevated flex items-center justify-center text-2xl font-bold text-secondary">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-3 sm:border-4 border-[#0a0a0a] bg-surface-elevated flex items-center justify-center text-xl sm:text-2xl font-bold text-secondary">
               {user?.username?.[0] || '?'}
             </div>
           )}
@@ -473,8 +473,8 @@ function StatsBlock() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-3 gap-3">
-        {[1, 2, 3].map(i => <div key={i} className="glass p-4"><div className="skeleton h-12 w-full" /></div>)}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        {[1, 2, 3].map(i => <div key={i} className="glass p-3 sm:p-4"><div className="skeleton h-10 sm:h-12 w-full" /></div>)}
       </div>
     );
   }
@@ -489,14 +489,14 @@ function StatsBlock() {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {items.map((item) => (
-        <div key={item.label} className="glass p-4 text-center">
-          <div className="flex items-center justify-center gap-1.5 mb-1 text-secondary">
+        <div key={item.label} className="glass p-3 sm:p-4 text-center">
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-1 text-secondary">
             {item.icon}
-            <span className="text-xs uppercase tracking-wider">{item.label}</span>
+            <span className="text-[10px] sm:text-xs uppercase tracking-wider">{item.label}</span>
           </div>
-          <p className="text-3xl font-bold font-mono" style={{ fontFamily: "'Geist Mono', monospace" }}>
+          <p className="text-2xl sm:text-3xl font-bold font-mono" style={{ fontFamily: "'Geist Mono', monospace" }}>
             <CountUp to={item.value} duration={2} />
           </p>
         </div>
@@ -563,20 +563,20 @@ export default function ProfilePage() {
   return (
     <LazyMotion features={domAnimation} strict>
       <div className="page-content">
-        <div className="max-w-3xl mx-auto px-4 space-y-6">
+        <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
           <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="text-center py-8"
+            className="text-center py-6 sm:py-8"
           >
             <SplitText
               text={config.displayName}
-              className="text-6xl sm:text-7xl font-black tracking-tight"
+              className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight"
             />
             <BlurText
               text={config.subtitle}
-              className="text-lg text-secondary mt-4"
+              className="text-base sm:text-lg text-secondary mt-4"
               delay={0.3}
             />
           </m.div>

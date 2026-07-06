@@ -18,14 +18,14 @@ export default function ConnectPage() {
   return (
     <LazyMotion features={domAnimation} strict>
       <div className="page-content">
-        <div className="max-w-3xl mx-auto px-4 space-y-6">
+        <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
           <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Connect</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Connect</h1>
             <p className="text-secondary">Find me across the internet</p>
           </m.div>
 
@@ -39,7 +39,7 @@ export default function ConnectPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="glass glass-hover p-6 flex items-center gap-4 no-underline group"
+                className="glass glass-hover p-4 sm:p-6 flex items-center gap-3 sm:gap-4 no-underline group"
               >
               <div className="text-secondary group-hover:text-foreground transition-colors">
                 {link.icon && <link.icon size={20} />}
@@ -79,7 +79,7 @@ export default function ConnectPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="glass p-8 text-center"
+            className="glass p-6 sm:p-8 text-center"
           >
           <Send size={24} className="text-secondary mx-auto mb-3" />
           <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>

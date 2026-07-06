@@ -23,7 +23,7 @@ export default function BlurText({ text, className, delay = 0 }: BlurTextProps) 
 
   return (
     <LazyMotion features={domAnimation} strict>
-      <m.span ref={ref} className={className} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
+      <m.span ref={ref} className={className} style={{ display: 'block', textAlign: 'center' }} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
         {text.split(' ').map((word, i) => (
           <m.span key={`${word}-${i}`} custom={delay + i} variants={wordVariants} style={{ display: 'inline-block', marginRight: '0.3em' }}>
             {word}

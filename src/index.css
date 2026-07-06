@@ -36,15 +36,24 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
 }
 
 /* ── Glass Utility ───────────────────────────────────── */
 .glass {
   background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
+}
+
+@media (min-width: 640px) {
+  .glass {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
 }
 
 .glass-hover {
@@ -68,11 +77,20 @@ body {
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 6px;
+  padding: 4px;
   border-radius: 9999px;
   background: rgba(14, 14, 14, 0.75);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  max-width: calc(100vw - 2rem);
+}
+
+@media (min-width: 640px) {
+  .topbar {
+    padding: 6px;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
 }
 
 .topbar-border {
@@ -102,10 +120,10 @@ body {
 .topbar-tab {
   position: relative;
   z-index: 1;
-  padding: 8px 20px;
+  padding: 10px 14px;
   border-radius: 9999px;
   font-family: 'Geist Mono', monospace;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.02em;
   color: #888;
@@ -115,6 +133,14 @@ body {
   border: none;
   outline: none;
   user-select: none;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .topbar-tab {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
 }
 
 .topbar-tab:hover {
@@ -138,9 +164,15 @@ body {
 
 /* ── Page wrapper ────────────────────────────────────── */
 .page-content {
-  padding-top: 100px;
+  padding-top: 90px;
   padding-bottom: 80px;
   min-height: 100vh;
+}
+
+@media (min-width: 640px) {
+  .page-content {
+    padding-top: 100px;
+  }
 }
 
 /* ── Marquee ─────────────────────────────────────────── */

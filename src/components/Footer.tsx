@@ -23,10 +23,11 @@ export { GithubIcon, DiscordIcon, InstagramIcon };
 
 export default function Footer() {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 text-xs font-mono text-muted" style={{ fontFamily: "'Geist Mono', monospace" }}>
+    <footer className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 text-[10px] sm:text-xs font-mono text-muted" style={{ fontFamily: "'Geist Mono', monospace" }}>
       <span className="flex items-center gap-1.5">
-        <Code2 size={12} className="text-secondary" />
-        Built with React + Tailwind
+        <Code2 size={12} className="text-secondary hidden sm:block" />
+        <span className="hidden sm:inline">Built with React + Tailwind</span>
+        <span className="sm:hidden">React</span>
       </span>
       <span suppressHydrationWarning>
         &copy; {new Date().getFullYear()} {config.displayName}

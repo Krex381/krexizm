@@ -23,7 +23,7 @@ export default function SplitText({ text, className, delay = 0 }: SplitTextProps
 
   return (
     <LazyMotion features={domAnimation} strict>
-      <m.span ref={ref} className={className} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
+      <m.span ref={ref} className={className} style={{ display: 'block', textAlign: 'center' }} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
         {text.split('').map((char, i) => (
           <m.span key={`${char}-${i}`} custom={delay + i} variants={charVariants} style={{ display: 'inline-block', whiteSpace: char === ' ' ? 'pre' : undefined }}>
             {char}

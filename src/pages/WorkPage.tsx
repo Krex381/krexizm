@@ -52,7 +52,7 @@ function FeaturedRepos({ repos }: { repos: Repo[] }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1, duration: 0.5 }}
-          className="glass glass-hover block p-6 no-underline"
+          className="glass glass-hover block p-4 sm:p-6 no-underline"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
@@ -133,18 +133,18 @@ function BentoGrid({ repos }: { repos: Repo[] }) {
 
 function ContributionGraph() {
   return (
-    <div className="glass p-6">
+    <div className="glass p-4 sm:p-6">
       <h3 className="text-sm font-semibold text-foreground mb-4" style={{ fontFamily: "'Geist Mono', monospace" }}>
         Contributions
       </h3>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-2 px-2">
         <img
           src={`https://gh-heat.anishroy.com/api/${config.github.username}/svg?darkMode=true&theme=green&bg=0a0a0a&transparent=true&showMonthLabels=true&showDayLabels=true&showLegend=false&cellSize=13&cellGap=3&padding=16`}
           alt={`${config.github.username} contribution chart`}
           width={720}
           height={120}
           loading="lazy"
-          className="w-full"
+          className="w-full min-w-[600px]"
         />
       </div>
     </div>
@@ -163,7 +163,7 @@ function LanguagesBar({ repos }: { repos: Repo[] }) {
   }, [repos]);
 
   return (
-    <div className="glass p-6">
+    <div className="glass p-4 sm:p-6">
       <h3 className="text-sm font-semibold text-foreground mb-4" style={{ fontFamily: "'Geist Mono', monospace" }}>
         Languages
       </h3>
@@ -178,10 +178,10 @@ function LanguagesBar({ repos }: { repos: Repo[] }) {
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2 sm:gap-3">
         {sorted.map(([lang, count]) => (
           <div key={lang} className="flex items-center gap-1.5 text-xs text-secondary">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: LANG_COLORS[lang] || '#888' }} />
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full" style={{ background: LANG_COLORS[lang] || '#888' }} />
             {lang}
             <span className="text-muted">({count})</span>
           </div>
@@ -198,9 +198,9 @@ export default function WorkPage() {
   if (loading) {
     return (
       <div className="page-content">
-        <div className="max-w-3xl mx-auto px-4 space-y-6">
+        <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
           <div className="skeleton h-8 w-48 mx-auto" />
-          {[1, 2, 3].map(i => <div key={i} className="skeleton h-32 w-full" />)}
+          {[1, 2, 3].map(i => <div key={i} className="skeleton h-28 sm:h-32 w-full" />)}
         </div>
       </div>
     );
@@ -210,14 +210,14 @@ export default function WorkPage() {
     return (
       <LazyMotion features={domAnimation} strict>
         <div className="page-content">
-          <div className="max-w-3xl mx-auto px-4 space-y-6">
+          <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
             <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="text-center"
             >
-              <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Work</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Work</h1>
               <p className="text-secondary">Open source projects and experiments</p>
             </m.div>
             <div className="glass p-6 text-center">
@@ -232,14 +232,14 @@ export default function WorkPage() {
   return (
     <LazyMotion features={domAnimation} strict>
       <div className="page-content">
-        <div className="max-w-3xl mx-auto px-4 space-y-6">
+        <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
           <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Work</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Work</h1>
             <p className="text-secondary">Open source projects and experiments</p>
           </m.div>
 

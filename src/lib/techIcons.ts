@@ -16,7 +16,7 @@ import {
   SiStackoverflow, SiMedium, SiInstagram, SiWordpress, SiShopify,
   SiStripe, SiPaypal, SiArduino, SiFigma, SiGrafana, SiPrometheus,
   SiElasticsearch, SiInfluxdb, SiApachekafka, SiRabbitmq, SiSelenium,
-  SiCypress, SiJest, SiMocha, SiCloudflare, SiVercel, SiNetlify,
+  SiCypress, SiJest, SiMocha, SiCloudflare, SiVercel, SiNetlify, SiFirebase,
 } from 'react-icons/si';
 import {
   FaJava, FaHtml5, FaJs, FaGitAlt,
@@ -84,6 +84,7 @@ const iconMap: Record<string, IconType> = {
   mariadb: SiMariadb,
   elasticsearch: SiElasticsearch,
   influxdb: SiInfluxdb,
+  firebase: SiFirebase,
 
   // DevOps / Infra
   docker: SiDocker,
