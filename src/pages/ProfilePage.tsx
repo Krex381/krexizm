@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LazyMotion, m, domAnimation } from 'framer-motion';
 import { config, api } from '@/config';
 import { useLanyard, type LanyardData } from '@/hooks/useLanyard';
