@@ -1,19 +1,29 @@
-/**
- * Resolve activity image URL from Lanyard data.
- * Handles external, spotify, rich presence, and game icons.
- */
+const SAFE_APP_ID = /^\d{17,20}$/;
+const SAFE_ASSET_KEY = /^[a-zA-Z0-9_\-]+$/;
+
+function sanitizeAppId(id: string): string | null {
+  return SAFE_APP_ID.test(id) ? id : null;
+}
+
+function sanitizeAssetKey(key: string): string | null {
+  return SAFE_ASSET_KEY.test(key) ? key : null;
+}
+
 export async function resolveActivityImage(
   image: string | undefined | null,
   applicationId?: string | null
 ): Promise<string | null> {
   if (!image) {
     if (!applicationId) return null;
+    const safeAppId = sanitizeAppId(applicationId);
+    if (!safeAppId) return null;
     try {
-      const res = await fetch(`https://discord.com/api/v10/applications/${applicationId}/rpc`);
+      const res = await fetch(`https://discord.com/api/v10/applications/${safeAppId}/rpc`);
       if (!res.ok) return null;
       const data = await res.json();
-      return data.icon
-        ? `https://cdn.discordapp.com/app-icons/${applicationId}/${data.icon}.png?size=512`
+      const icon = typeof data.icon === 'string' ? sanitizeAssetKey(data.icon) : null;
+      return icon
+        ? `https://cdn.discordapp.com/app-icons/${safeAppId}/${icon}.png?size=512`
         : null;
     } catch {
       return null;
@@ -25,14 +35,19 @@ export async function resolveActivityImage(
   }
 
   if (image.startsWith('spotify:')) {
-    return `https://i.scdn.co/image/${image.replace('spotify:', '')}`;
+    const assetId = image.replace('spotify:', '');
+    return SAFE_ASSET_KEY.test(assetId) ? `https://i.scdn.co/image/${assetId}` : null;
   }
 
   if (!applicationId) return null;
+  const safeAppId = sanitizeAppId(applicationId);
+  if (!safeAppId) return null;
+  const safeImage = sanitizeAssetKey(image);
+  if (!safeImage) return null;
 
-  return /^\d+$/.test(image)
-    ? `https://cdn.discordapp.com/app-assets/${applicationId}/${image}.png?size=512`
-    : `https://cdn.discordapp.com/app-icons/${applicationId}/${image}.png?size=512&keep_aspect_ratio=false`;
+  return /^\d+$/.test(safeImage)
+    ? `https://cdn.discordapp.com/app-assets/${safeAppId}/${safeImage}.png?size=512`
+    : `https://cdn.discordapp.com/app-icons/${safeAppId}/${safeImage}.png?size=512&keep_aspect_ratio=false`;
 }
 
 /**

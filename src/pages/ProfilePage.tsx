@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { LazyMotion, m, domAnimation } from 'framer-motion';
 import { config, api } from '@/config';
-import { useLanyard } from '@/hooks/useLanyard';
+import { useLanyard, type LanyardData } from '@/hooks/useLanyard';
 import { useFetch } from '@/lib/useFetch';
 import { getCountryCode } from '@/lib/flags';
 import ReactCountryFlag from 'react-country-flag';
@@ -11,7 +11,47 @@ import SplitText from '@/components/SplitText';
 import BlurText from '@/components/BlurText';
 import CountUp from '@/components/CountUp';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Clock, Calendar, Shield, Terminal, Server, Network, Database, Code2, Music, Monitor, Smartphone, GlobeIcon, Gamepad2, Heart } from 'lucide-react';
+import { Globe, Clock, Calendar, Shield, Terminal, Server, Network, Database, Code2, Music, Monitor, Smartphone, Gamepad2, Heart } from 'lucide-react';
+
+interface DiscordUser {
+  id: string;
+  username: string;
+  global_name: string;
+  avatar: string;
+  bio?: string;
+}
+
+interface DiscordBadge {
+  id: string;
+  icon: string;
+  description: string;
+}
+
+interface DiscordProfile {
+  user: DiscordUser;
+  badges: DiscordBadge[];
+  widgets?: DiscordWidget[];
+}
+
+interface DiscordWidget {
+  data?: {
+    type: string;
+    games?: WidgetGame[];
+  };
+}
+
+interface WidgetGame {
+  game_id: string;
+}
+
+interface GitHubUser {
+  public_repos: number;
+  followers: number;
+}
+
+interface GitHubRepo {
+  stargazers_count: number;
+}
 
 const statusColors: Record<string, string> = {
   online: '#23a55a',
@@ -20,25 +60,23 @@ const statusColors: Record<string, string> = {
   offline: '#80848e',
 };
 
+const VIENNA_FMT = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Vienna',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+});
+
 function LocalClock() {
-  const [time, setTime] = useState(() => {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-    const ms = String(now.getMilliseconds()).padStart(3, '0');
-    return `${h}:${m}:${s}.${ms}`;
-  });
+  const formatTime = (d: Date) => `${VIENNA_FMT.format(d)}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+
+  const [time, setTime] = useState(() => formatTime(new Date()));
 
   useEffect(() => {
     let id: number;
     const update = () => {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      const ms = String(now.getMilliseconds()).padStart(3, '0');
-      setTime(`${h}:${m}:${s}.${ms}`);
+      setTime(formatTime(new Date()));
       id = requestAnimationFrame(update);
     };
     id = requestAnimationFrame(update);
@@ -48,26 +86,31 @@ function LocalClock() {
   return <>{time}</>;
 }
 
+const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
+const DOB = new Date(config.dateOfBirth);
+
 function LiveAge() {
-  const [age, setAge] = useState(() => {
-    const dob = new Date(config.dateOfBirth);
-    const diff = Date.now() - dob.getTime();
-    return (diff / (365.25 * 24 * 60 * 60 * 1000)).toFixed(8);
-  });
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const dob = new Date(config.dateOfBirth);
+    let lastFrame = -1;
     let id: number;
     const update = () => {
-      const diff = Date.now() - dob.getTime();
-      setAge((diff / (365.25 * 24 * 60 * 60 * 1000)).toFixed(8));
+      const now = Date.now();
+      const currentFrame = Math.floor(now / 200);
+      if (currentFrame !== lastFrame && ref.current) {
+        lastFrame = currentFrame;
+        ref.current.textContent = ((now - DOB.getTime()) / MS_PER_YEAR).toFixed(8) + ' years';
+      }
       id = requestAnimationFrame(update);
     };
     id = requestAnimationFrame(update);
     return () => cancelAnimationFrame(id);
   }, []);
 
-  return <>{age} years</>;
+  const initial = ((Date.now() - DOB.getTime()) / MS_PER_YEAR).toFixed(8);
+
+  return <span ref={ref}>{initial} years</span>;
 }
 
 function IdentityBlock() {
@@ -107,7 +150,7 @@ function IdentityBlock() {
   );
 }
 
-function ActivityItem({ activity }: { activity: any }) {
+function ActivityItem({ activity }: { activity: LanyardData['activities'][number] }) {
   const [largeImage, setLargeImage] = useState<string | null>(null);
   const [smallImage, setSmallImage] = useState<string | null>(null);
 
@@ -136,12 +179,14 @@ function ActivityItem({ activity }: { activity: any }) {
 
   return (
     <div className="flex items-start gap-3 p-2 rounded-lg bg-white/[0.02]">
-      {/* Activity image */}
       {largeImage ? (
         <div className="relative shrink-0">
           <img
             src={largeImage}
             alt={activity.name || 'Activity'}
+            width={48}
+            height={48}
+            loading="lazy"
             className="w-12 h-12 rounded-lg object-cover"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
@@ -149,6 +194,9 @@ function ActivityItem({ activity }: { activity: any }) {
             <img
               src={smallImage}
               alt=""
+              width={20}
+              height={20}
+              loading="lazy"
               className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-[#0a0a0a]"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
@@ -179,32 +227,30 @@ function ActivityItem({ activity }: { activity: any }) {
   );
 }
 
-function DiscordBlock() {
+function DiscordBlock({ profile }: { profile: DiscordProfile | null }) {
   const { data: status, loading: statusLoading } = useLanyard();
-  const { data: profile, loading: profileLoading } = useFetch<any>(api.discordProfile);
-  const loading = statusLoading || profileLoading;
 
-  if (loading) {
+  if (statusLoading) {
     return <div className="glass p-6"><div className="skeleton h-40 w-full" /></div>;
   }
 
   const user = profile?.user;
   const allActivities = status?.activities || [];
-  const activities = allActivities.filter((a: any) => a.type !== 4);
+  const activities = allActivities.filter((a) => a.type !== 4);
   const discordStatus = status?.discord_status || 'offline';
   const badges = profile?.badges || [];
   const bio = user?.bio || '';
 
   return (
     <div className="glass p-6">
-      {/* Profile section */}
       <div className="flex items-end gap-4 mb-4">
-        {/* Avatar with status dot */}
         <div className="relative shrink-0">
           {user?.avatar ? (
             <img
               src={api.discordAvatar(user.id, user.avatar)}
               alt="Discord avatar"
+              width={64}
+              height={64}
               className="w-16 h-16 rounded-full border-4 border-[#0a0a0a]"
             />
           ) : (
@@ -223,80 +269,80 @@ function DiscordBlock() {
           </span>
         </div>
 
-        {/* Name + badges */}
         <div className="pb-1">
           <p className="text-lg font-bold text-foreground">{user?.global_name || user?.username}</p>
           <p className="text-sm text-secondary font-mono" style={{ fontFamily: "'Geist Mono', monospace" }}>
             {user?.username}
           </p>
-            <div className="flex gap-1.5 mt-1.5">
-              {badges.map((b: any) => (
-                <span key={b.id} className="group relative">
-                  <img
-                    src={`https://cdn.discordapp.com/badge-icons/${b.icon}.png?size=32`}
-                    alt={b.description}
-                    className="w-5 h-5"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
-                    {b.description}
-                  </span>
-                </span>
-              ))}
-              {status?.active_on_discord_desktop && (
-                <span className="group relative">
-                  <Monitor size={20} className="text-secondary" />
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
-                    Desktop
-                  </span>
-                </span>
-              )}
-              {status?.active_on_discord_mobile && (
-                <span className="group relative">
-                  <Smartphone size={20} className="text-secondary" />
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
-                    Mobile
-                  </span>
-                </span>
-              )}
-              {status?.active_on_discord_web && (
-                <span className="group relative">
-                  <GlobeIcon size={20} className="text-secondary" />
-                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
-                    Web
-                  </span>
-                </span>
-              )}
-              <span className="group relative love-text">
-                <Heart size={20} className="text-red-500 fill-red-500/30 hover:fill-red-500 transition-colors cursor-default relative z-10" />
-                <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a] text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-red-500/20 z-20">
-                  <span className="text-foreground">❤️ my GF</span>
+          <div className="flex gap-1.5 mt-1.5">
+            {badges.map((b) => (
+              <span key={b.id} className="group relative">
+                <img
+                  src={`https://cdn.discordapp.com/badge-icons/${b.icon}.png?size=32`}
+                  alt={b.description}
+                  width={20}
+                  height={20}
+                  loading="lazy"
+                  className="w-5 h-5"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
+                  {b.description}
                 </span>
               </span>
-            </div>
+            ))}
+            {status?.active_on_discord_desktop && (
+              <span className="group relative">
+                <Monitor size={20} className="text-secondary" />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
+                  Desktop
+                </span>
+              </span>
+            )}
+            {status?.active_on_discord_mobile && (
+              <span className="group relative">
+                <Smartphone size={20} className="text-secondary" />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
+                  Mobile
+                </span>
+              </span>
+            )}
+            {status?.active_on_discord_web && (
+              <span className="group relative">
+                <Globe size={20} className="text-secondary" />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1a1a1a] text-[10px] text-foreground rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
+                  Web
+                </span>
+              </span>
+            )}
+            <span className="group relative love-text">
+              <Heart size={20} className="text-red-500 fill-red-500/30 hover:fill-red-500 transition-colors cursor-default relative z-10" />
+              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a] text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-red-500/20 z-20">
+                <span className="text-foreground">❤️ my GF</span>
+              </span>
+            </span>
           </div>
         </div>
+      </div>
 
-        {/* Bio */}
-        {bio && (
-          <>
-            <p className="text-xs font-semibold uppercase tracking-wider text-secondary mb-2">About me</p>
-            <p className="text-sm text-secondary mb-4 whitespace-pre-line">{bio}</p>
-          </>
+      {bio && (
+        <>
+          <p className="text-xs font-semibold uppercase tracking-wider text-secondary mb-2">About me</p>
+          <p className="text-sm text-secondary mb-4 whitespace-pre-line">{bio}</p>
+        </>
+      )}
+
+      <div className="mb-3">
+        {activities.length > 0 ? (
+          <div className="space-y-1">
+            {activities.slice(0, 3).map((a) => (
+              <ActivityItem key={a.id || a.name} activity={a} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-muted italic">No activities right now</p>
         )}
-
-        {/* Activities with images */}
-        <div className="mb-3">
-          {activities.length > 0 ? (
-            <div className="space-y-1">
-              {activities.slice(0, 3).map((a: any) => (
-                <ActivityItem key={a.id || a.name} activity={a} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-muted italic">No activities right now</p>
-          )}
-        </div>
+      </div>
     </div>
   );
 }
@@ -358,6 +404,9 @@ function GameTile({ gameId }: { gameId: string }) {
         <img
           src={game.icon}
           alt={game.name}
+          width={40}
+          height={40}
+          loading="lazy"
           className="w-10 h-10 rounded-lg object-cover"
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
@@ -374,9 +423,9 @@ function GameTile({ gameId }: { gameId: string }) {
   );
 }
 
-function GamesWidget({ widgets }: { widgets: any[] }) {
-  const currentWidget = widgets.find((w: any) => w.data?.type === 'current_games');
-  const playedWidget = widgets.find((w: any) => w.data?.type === 'played_games');
+function GamesWidget({ widgets }: { widgets: DiscordWidget[] }) {
+  const currentWidget = widgets.find((w) => w.data?.type === 'current_games');
+  const playedWidget = widgets.find((w) => w.data?.type === 'played_games');
 
   const currentGames = currentWidget?.data?.games || [];
   const playedGames = playedWidget?.data?.games || [];
@@ -396,7 +445,7 @@ function GamesWidget({ widgets }: { widgets: any[] }) {
         <div className="mb-3">
           <p className="text-[10px] text-muted uppercase tracking-wider mb-2">Currently Playing</p>
           <div className="flex flex-wrap gap-2">
-            {currentGames.map((g: any) => (
+            {currentGames.map((g) => (
               <GameTile key={g.game_id} gameId={g.game_id} />
             ))}
           </div>
@@ -407,7 +456,7 @@ function GamesWidget({ widgets }: { widgets: any[] }) {
         <div>
           <p className="text-[10px] text-muted uppercase tracking-wider mb-2">Played</p>
           <div className="flex flex-wrap gap-2">
-            {playedGames.map((g: any) => (
+            {playedGames.map((g) => (
               <GameTile key={g.game_id} gameId={g.game_id} />
             ))}
           </div>
@@ -418,8 +467,8 @@ function GamesWidget({ widgets }: { widgets: any[] }) {
 }
 
 function StatsBlock() {
-  const { data: user, loading: userLoading } = useFetch<any>(api.githubUser);
-  const { data: repos, loading: reposLoading } = useFetch<any[]>(api.githubRepos);
+  const { data: user, loading: userLoading } = useFetch<GitHubUser>(api.githubUser);
+  const { data: repos, loading: reposLoading } = useFetch<GitHubRepo[]>(api.githubRepos);
   const loading = userLoading || reposLoading;
 
   if (loading) {
@@ -430,7 +479,7 @@ function StatsBlock() {
     );
   }
 
-  const totalStars = Array.isArray(repos) ? repos.reduce((sum: number, r: any) => sum + (r.stargazers_count || 0), 0) : 0;
+  const totalStars = Array.isArray(repos) ? repos.reduce((sum, r) => sum + (r.stargazers_count || 0), 0) : 0;
   const stats = { repos: user?.public_repos || 0, followers: user?.followers || 0, stars: totalStars };
 
   const items = [
@@ -508,7 +557,7 @@ function TechMarquee() {
 }
 
 export default function ProfilePage() {
-  const { data: profile } = useFetch<any>(api.discordProfile);
+  const { data: profile } = useFetch<DiscordProfile>(api.discordProfile);
   const widgets = profile?.widgets || [];
 
   return (
@@ -533,7 +582,7 @@ export default function ProfilePage() {
           </m.div>
 
           <IdentityBlock />
-          <DiscordBlock />
+          <DiscordBlock profile={profile} />
           {widgets.length > 0 && <GamesWidget widgets={widgets} />}
           <StatsBlock />
           <SkillsBlock />

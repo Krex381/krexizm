@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { LazyMotion, m, domAnimation } from 'framer-motion';
 import { config, api } from '@/config';
 import { Badge } from '@/components/ui/badge';
@@ -35,10 +36,10 @@ const LANG_COLORS: Record<string, string> = {
 };
 
 function FeaturedRepos({ repos }: { repos: Repo[] }) {
-  const featured = repos
-    .filter(r => !r.fork && !config.excludeRepos.includes(r.name as any))
+  const featured = useMemo(() => repos
+    .filter(r => !r.fork && !config.excludeRepos.includes(r.name))
     .sort((a, b) => b.stargazers_count - a.stargazers_count)
-    .slice(0, 3);
+    .slice(0, 3), [repos]);
 
   return (
     <div className="space-y-3">
@@ -91,10 +92,10 @@ function FeaturedRepos({ repos }: { repos: Repo[] }) {
 }
 
 function BentoGrid({ repos }: { repos: Repo[] }) {
-  const others = repos
-    .filter(r => !r.fork && !config.excludeRepos.includes(r.name as any))
+  const others = useMemo(() => repos
+    .filter(r => !r.fork && !config.excludeRepos.includes(r.name))
     .sort((a, b) => b.stargazers_count - a.stargazers_count)
-    .slice(3, 9);
+    .slice(3, 9), [repos]);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -140,6 +141,9 @@ function ContributionGraph() {
         <img
           src={`https://gh-heat.anishroy.com/api/${config.github.username}/svg?darkMode=true&theme=green&bg=0a0a0a&transparent=true&showMonthLabels=true&showDayLabels=true&showLegend=false&cellSize=13&cellGap=3&padding=16`}
           alt={`${config.github.username} contribution chart`}
+          width={720}
+          height={120}
+          loading="lazy"
           className="w-full"
         />
       </div>
@@ -148,12 +152,15 @@ function ContributionGraph() {
 }
 
 function LanguagesBar({ repos }: { repos: Repo[] }) {
-  const langMap: Record<string, number> = {};
-  for (const r of repos) {
-    if (!r.fork && r.language) langMap[r.language] = (langMap[r.language] || 0) + 1;
-  }
-  const total = Object.values(langMap).reduce((a, b) => a + b, 0);
-  const sorted = Object.entries(langMap).sort((a, b) => b[1] - a[1]);
+  const { sorted, total } = useMemo(() => {
+    const langMap: Record<string, number> = {};
+    for (const r of repos) {
+      if (!r.fork && r.language) langMap[r.language] = (langMap[r.language] || 0) + 1;
+    }
+    const total = Object.values(langMap).reduce((a, b) => a + b, 0);
+    const sorted = Object.entries(langMap).sort((a, b) => b[1] - a[1]);
+    return { sorted, total };
+  }, [repos]);
 
   return (
     <div className="glass p-6">
@@ -185,7 +192,7 @@ function LanguagesBar({ repos }: { repos: Repo[] }) {
 }
 
 export default function WorkPage() {
-  const { data: allRepos, loading, error } = useFetch<any[]>(api.githubRepos);
+  const { data: allRepos, loading, error } = useFetch<Repo[]>(api.githubRepos);
   const repos = Array.isArray(allRepos) ? allRepos : [];
 
   if (loading) {

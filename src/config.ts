@@ -37,7 +37,7 @@ export const config = {
   ],
 
   // Repos to exclude from Work page (e.g. portfolio repo)
-  excludeRepos: ['Krex381'] as const,
+  excludeRepos: ['Krex381'],
 
   // Skills
   skills: [

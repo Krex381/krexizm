@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const cache = new Map<string, { data: any; ts: number }>();
+const cache = new Map<string, { data: unknown; ts: number }>();
 
 export function useFetch<T>(url: string): { data: T | null; loading: boolean; error: boolean } {
   const [data, setData] = useState<T | null>(null);
@@ -14,7 +14,7 @@ export function useFetch<T>(url: string): { data: T | null; loading: boolean; er
 
     const cached = cache.get(url);
     if (cached && Date.now() - cached.ts < CACHE_TTL) {
-      setData(cached.data);
+      setData(cached.data as T);
       setLoading(false);
       return () => { mountedRef.current = false; };
     }

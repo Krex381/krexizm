@@ -1,25 +1,51 @@
 import { useState, useEffect, useRef } from 'react';
 import { config } from '@/config';
 
-interface LanyardData {
+interface LanyardActivityAssets {
+  large_image?: string;
+  large_text?: string;
+  small_image?: string;
+  small_text?: string;
+}
+
+interface LanyardActivity {
+  id: string;
+  name: string;
+  type: number;
+  state?: string;
+  details?: string;
+  timestamps?: { start?: number; end?: number };
+  assets?: LanyardActivityAssets;
+  application_id?: string;
+}
+
+interface LanyardSpotify {
+  song: string;
+  artist: string;
+  album_art_url: string;
+  album: string;
+  timestamps: { start: number; end: number };
+}
+
+export interface LanyardData {
   kv: Record<string, string>;
   discord_user: {
     id: string;
     username: string;
     global_name: string;
     avatar: string;
-    avatar_decoration_data: any;
+    avatar_decoration_data: Record<string, unknown> | null;
     bot: boolean;
     discriminator: string;
     public_flags: number;
   };
-  activities: any[];
+  activities: LanyardActivity[];
   discord_status: string;
   active_on_discord_web: boolean;
   active_on_discord_desktop: boolean;
   active_on_discord_mobile: boolean;
   listening_to_spotify: boolean;
-  spotify: any;
+  spotify: LanyardSpotify | null;
 }
 
 export function useLanyard() {
