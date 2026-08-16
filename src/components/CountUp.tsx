@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { LazyMotion, m, useInView, useMotionValue, useSpring, useMotionValueEvent, domAnimation } from 'framer-motion';
+import { m, useInView, useMotionValue, useSpring, useMotionValueEvent } from 'framer-motion';
 
 interface CountUpProps {
   from?: number;
@@ -29,10 +29,8 @@ export default function CountUp({ from = 0, to, duration = 2, className, decimal
   });
 
   return (
-    <LazyMotion features={domAnimation} strict>
-      <m.span ref={ref} className={className}>
-        {from.toFixed(decimals)}{suffix}
-      </m.span>
-    </LazyMotion>
+    <m.span ref={ref} className={className}>
+      {from.toFixed(decimals)}{suffix}
+    </m.span>
   );
 }

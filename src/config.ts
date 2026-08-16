@@ -5,7 +5,7 @@ export const config = {
   dateOfBirth: '2009-04-01T00:00:00Z' as const,
   location: 'Austria / Vienna' as const,
   country: 'Austria' as const,
-  web3formsAccessKey: '1e740942-80db-4c1d-9355-1e96de939c64'  as const,
+  web3formsAccessKey: (import.meta.env.VITE_WEB3FORMS_KEY || '1e740942-80db-4c1d-9355-1e96de939c64'),
 
   // IDs
   discord: {

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { LazyMotion, m, useInView, domAnimation, type Variants } from 'framer-motion';
+import { m, useInView, type Variants } from 'framer-motion';
 
 interface BlurTextProps {
   text: string;
@@ -22,14 +22,12 @@ export default function BlurText({ text, className, delay = 0 }: BlurTextProps) 
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <LazyMotion features={domAnimation} strict>
-      <m.span ref={ref} className={className} style={{ display: 'block', textAlign: 'center' }} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
-        {text.split(' ').map((word, i) => (
-          <m.span key={`${word}-${i}`} custom={delay + i} variants={wordVariants} style={{ display: 'inline-block', marginRight: '0.3em' }}>
-            {word}
-          </m.span>
-        ))}
-      </m.span>
-    </LazyMotion>
+    <m.span ref={ref} className={className} style={{ display: 'block', textAlign: 'center' }} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
+      {text.split(' ').map((word, i) => (
+        <m.span key={`${word}-${i}`} custom={delay + i} variants={wordVariants} style={{ display: 'inline-block', marginRight: '0.3em' }}>
+          {word}
+        </m.span>
+      ))}
+    </m.span>
   );
 }

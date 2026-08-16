@@ -78,6 +78,7 @@ body {
   align-items: center;
   gap: 2px;
   padding: 4px;
+  padding-top: max(4px, env(safe-area-inset-top));
   border-radius: 9999px;
   background: rgba(14, 14, 14, 0.75);
   backdrop-filter: blur(16px);
@@ -164,14 +165,14 @@ body {
 
 /* ── Page wrapper ────────────────────────────────────── */
 .page-content {
-  padding-top: 90px;
+  padding-top: max(90px, env(safe-area-inset-top) + 90px);
   padding-bottom: 80px;
   min-height: 100vh;
 }
 
 @media (min-width: 640px) {
   .page-content {
-    padding-top: 100px;
+    padding-top: max(100px, env(safe-area-inset-top) + 100px);
   }
 }
 
@@ -203,6 +204,30 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 8px;
+}
+
+/* ── Skip Link ───────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--color-accent);
+  color: var(--color-background);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transform: translateY(-100%);
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  top: 1rem;
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 2px;
 }
 
 /* ── Scrollbar ───────────────────────────────────────── */
@@ -289,7 +314,7 @@ body {
 
 /* ── Reduced Motion ──────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *:not([style*="framer"]):not([data-framer-motion]) {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

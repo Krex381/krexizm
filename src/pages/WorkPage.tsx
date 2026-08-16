@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { LazyMotion, m, domAnimation } from 'framer-motion';
+import { m } from 'framer-motion';
 import { config, api } from '@/config';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Star, GitFork, Code2 } from 'lucide-react';
@@ -208,29 +208,6 @@ export default function WorkPage() {
 
   if (error) {
     return (
-      <LazyMotion features={domAnimation} strict>
-        <div className="page-content">
-          <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
-            <m.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Work</h1>
-              <p className="text-secondary">Open source projects and experiments</p>
-            </m.div>
-            <div className="glass p-6 text-center">
-              <p className="text-secondary">GitHub API rate limited. Try again in a minute.</p>
-            </div>
-          </div>
-        </div>
-      </LazyMotion>
-    );
-  }
-
-  return (
-    <LazyMotion features={domAnimation} strict>
       <div className="page-content">
         <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
           <m.div
@@ -242,13 +219,32 @@ export default function WorkPage() {
             <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Work</h1>
             <p className="text-secondary">Open source projects and experiments</p>
           </m.div>
-
-          <FeaturedRepos repos={repos} />
-          <BentoGrid repos={repos} />
-          <ContributionGraph />
-          <LanguagesBar repos={repos} />
+          <div className="glass p-6 text-center">
+            <p className="text-secondary">GitHub API rate limited. Try again in a minute.</p>
+          </div>
         </div>
       </div>
-    </LazyMotion>
+    );
+  }
+
+  return (
+    <div className="page-content">
+      <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
+        <m.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center"
+        >
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ fontFamily: "'Geist Mono', monospace" }}>Work</h1>
+          <p className="text-secondary">Open source projects and experiments</p>
+        </m.div>
+
+        <FeaturedRepos repos={repos} />
+        <BentoGrid repos={repos} />
+        <ContributionGraph />
+        <LanguagesBar repos={repos} />
+      </div>
+    </div>
   );
 }

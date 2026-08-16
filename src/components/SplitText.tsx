@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { LazyMotion, m, useInView, domAnimation, type Variants } from 'framer-motion';
+import { m, useInView, type Variants } from 'framer-motion';
 
 interface SplitTextProps {
   text: string;
@@ -22,14 +22,12 @@ export default function SplitText({ text, className, delay = 0 }: SplitTextProps
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <LazyMotion features={domAnimation} strict>
-      <m.span ref={ref} className={className} style={{ display: 'block', textAlign: 'center' }} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
-        {text.split('').map((char, i) => (
-          <m.span key={`${char}-${i}`} custom={delay + i} variants={charVariants} style={{ display: 'inline-block', whiteSpace: char === ' ' ? 'pre' : undefined }}>
-            {char}
-          </m.span>
-        ))}
-      </m.span>
-    </LazyMotion>
+    <m.span ref={ref} className={className} style={{ display: 'block', textAlign: 'center' }} initial="hidden" animate={isInView ? 'visible' : 'hidden'}>
+      {text.split('').map((char, i) => (
+        <m.span key={`${char}-${i}`} custom={delay + i} variants={charVariants} style={{ display: 'inline-block', whiteSpace: char === ' ' ? 'pre' : undefined }}>
+          {char}
+        </m.span>
+      ))}
+    </m.span>
   );
 }

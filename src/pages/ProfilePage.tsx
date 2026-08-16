@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { LazyMotion, m, domAnimation } from 'framer-motion';
+import { m } from 'framer-motion';
 import { config, api } from '@/config';
 import { useLanyard, type LanyardData } from '@/hooks/useLanyard';
 import { useFetch } from '@/lib/useFetch';
@@ -74,13 +74,10 @@ function LocalClock() {
   const [time, setTime] = useState(() => formatTime(new Date()));
 
   useEffect(() => {
-    let id: number;
-    const update = () => {
+    const id = window.setInterval(() => {
       setTime(formatTime(new Date()));
-      id = requestAnimationFrame(update);
-    };
-    id = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(id);
+    }, 1000);
+    return () => clearInterval(id);
   }, []);
 
   return <>{time}</>;
@@ -93,19 +90,14 @@ function LiveAge() {
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    let lastFrame = -1;
-    let id: number;
     const update = () => {
-      const now = Date.now();
-      const currentFrame = Math.floor(now / 200);
-      if (currentFrame !== lastFrame && ref.current) {
-        lastFrame = currentFrame;
-        ref.current.textContent = ((now - DOB.getTime()) / MS_PER_YEAR).toFixed(8) + ' years';
+      if (ref.current) {
+        ref.current.textContent = ((Date.now() - DOB.getTime()) / MS_PER_YEAR).toFixed(8) + ' years';
       }
-      id = requestAnimationFrame(update);
     };
-    id = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(id);
+    update();
+    const id = window.setInterval(update, 200);
+    return () => clearInterval(id);
   }, []);
 
   const initial = ((Date.now() - DOB.getTime()) / MS_PER_YEAR).toFixed(8);
@@ -357,36 +349,48 @@ interface GameInfo {
 
 const SAFE_GAME_ID = /^\d{17,20}$/;
 
+const gameInfoCache = new Map<string, { game: GameInfo; promise: Promise<GameInfo> }>();
+
+function fetchGameInfo(gameId: string): Promise<GameInfo> {
+  const cached = gameInfoCache.get(gameId);
+  if (cached) return cached.promise;
+
+  const promise = (async () => {
+    if (!SAFE_GAME_ID.test(gameId)) {
+      return { id: gameId, name: gameId, icon: null, cover: null };
+    }
+    try {
+      const res = await fetch(`https://discord.com/api/v10/applications/${gameId}/rpc`);
+      if (!res.ok) throw new Error('not found');
+      const data = await res.json();
+      return {
+        id: gameId,
+        name: data.name || gameId,
+        icon: data.icon ? `https://cdn.discordapp.com/app-icons/${gameId}/${data.icon}.png?size=128` : null,
+        cover: data.cover_image ? `https://cdn.discordapp.com/app-assets/${gameId}/${data.cover_image}.png?size=512` : null,
+      };
+    } catch {
+      return { id: gameId, name: gameId, icon: null, cover: null };
+    }
+  })();
+
+  gameInfoCache.set(gameId, { game: { id: gameId, name: gameId, icon: null, cover: null }, promise });
+  promise.then(game => gameInfoCache.set(gameId, { game, promise }));
+  return promise;
+}
+
 function useGameInfo(gameId: string): { game: GameInfo | null; loading: boolean } {
   const [game, setGame] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    async function loadGame() {
-      if (!SAFE_GAME_ID.test(gameId)) {
-        if (!cancelled) { setGame({ id: gameId, name: gameId, icon: null, cover: null }); setLoading(false); }
-        return;
+    fetchGameInfo(gameId).then(g => {
+      if (!cancelled) {
+        setGame(g);
+        setLoading(false);
       }
-      try {
-        const res = await fetch(`https://discord.com/api/v10/applications/${gameId}/rpc`);
-        if (!res.ok) throw new Error('not found');
-        const data = await res.json();
-        if (!cancelled) {
-          setGame({
-            id: gameId,
-            name: data.name || gameId,
-            icon: data.icon ? `https://cdn.discordapp.com/app-icons/${gameId}/${data.icon}.png?size=128` : null,
-            cover: data.cover_image ? `https://cdn.discordapp.com/app-assets/${gameId}/${data.cover_image}.png?size=512` : null,
-          });
-        }
-      } catch {
-        if (!cancelled) setGame({ id: gameId, name: gameId, icon: null, cover: null });
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    loadGame();
+    });
     return () => { cancelled = true; };
   }, [gameId]);
 
@@ -568,34 +572,32 @@ export default function ProfilePage() {
   const widgets = profile?.widgets || [];
 
   return (
-    <LazyMotion features={domAnimation} strict>
-      <div className="page-content">
-        <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="text-center py-6 sm:py-8"
-          >
-            <SplitText
-              text={config.displayName}
-              className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight"
-            />
-            <BlurText
-              text={config.subtitle}
-              className="text-base sm:text-lg text-secondary mt-4"
-              delay={0.3}
-            />
-          </m.div>
+    <div className="page-content">
+      <div className="max-w-3xl mx-auto px-5 sm:px-4 space-y-5 sm:space-y-6">
+        <m.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+          className="text-center py-6 sm:py-8"
+        >
+          <SplitText
+            text={config.displayName}
+            className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight"
+          />
+          <BlurText
+            text={config.subtitle}
+            className="text-base sm:text-lg text-secondary mt-4"
+            delay={0.3}
+          />
+        </m.div>
 
-          <IdentityBlock />
-          <DiscordBlock profile={profile} />
-          {widgets.length > 0 && <GamesWidget widgets={widgets} />}
-          <StatsBlock />
-          <SkillsBlock />
-          <TechMarquee />
-        </div>
+        <IdentityBlock />
+        <DiscordBlock profile={profile} />
+        {widgets.length > 0 && <GamesWidget widgets={widgets} />}
+        <StatsBlock />
+        <SkillsBlock />
+        <TechMarquee />
       </div>
-    </LazyMotion>
+    </div>
   );
 }
