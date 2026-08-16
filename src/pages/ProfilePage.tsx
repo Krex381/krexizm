@@ -72,12 +72,15 @@ function LocalClock() {
   const formatTime = (d: Date) => `${VIENNA_FMT.format(d)}.${String(d.getMilliseconds()).padStart(3, '0')}`;
 
   const [time, setTime] = useState(() => formatTime(new Date()));
+  const rafRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    const id = window.setInterval(() => {
+    const update = () => {
       setTime(formatTime(new Date()));
-    }, 1000);
-    return () => clearInterval(id);
+      rafRef.current = requestAnimationFrame(update);
+    };
+    rafRef.current = requestAnimationFrame(update);
+    return () => { if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current); };
   }, []);
 
   return <>{time}</>;
@@ -88,16 +91,17 @@ const DOB = new Date(config.dateOfBirth);
 
 function LiveAge() {
   const ref = useRef<HTMLSpanElement>(null);
+  const rafRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const update = () => {
       if (ref.current) {
         ref.current.textContent = ((Date.now() - DOB.getTime()) / MS_PER_YEAR).toFixed(8) + ' years';
       }
+      rafRef.current = requestAnimationFrame(update);
     };
-    update();
-    const id = window.setInterval(update, 200);
-    return () => clearInterval(id);
+    rafRef.current = requestAnimationFrame(update);
+    return () => { if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current); };
   }, []);
 
   const initial = ((Date.now() - DOB.getTime()) / MS_PER_YEAR).toFixed(8);
